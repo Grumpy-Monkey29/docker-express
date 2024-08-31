@@ -41,4 +41,16 @@
 - /app/node_modules — creates a volume for the "node_modules" directory.
 - ports — maps the host's port 4000 to the container's port 4000.
 - command: npm run dev — specifies the command to run inside the container, initiating the "npm run dev" script.
+- ---
 - docker compose -f docker-compose.dev.yml up
+- docker build -t myexpressdockerimage -f Dockerfile .
+- create ECR repository: aws ecr create-repository --repository-name <ECRrepoName> --region <region>
+- GET ECR TOKEN: aws ecr get-login-password --region <region_name> (this will return a token)
+- LOG INTO ECR: aws ecr --region <region> | docker login -u AWS -p <encrypted_token from above> <repo_uri from repo creation> (this should return LOGIN Sucess)
+- we might need to retag the image to push it to ceratin ECR repository
+  - currentTag: myexpressdockerimage:latest
+  - TagWeWant: 021891597121.dkr.ecr.us-east-1.amazonaws.com/myexpressdockerimage:latest
+  - command: docker tag myexpressdockerimage:latest 021891597121.dkr.ecr.us-east-1.amazonaws.com/myexpressdockerimage:latest
+- push image to ECR
+  - docker push 021891597121.dkr.ecr.us-east-1.amazonaws.com/myexpressdockerimage:latest
+  - image name should match with the repo name otherwise we will get an error (mandatory)
