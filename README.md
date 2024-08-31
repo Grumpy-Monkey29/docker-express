@@ -1,14 +1,44 @@
-# Welcome to your CDK TypeScript project
+- npm init -y
+- npm i express
+- npm i -D @types/express typescript ts-node-dev rimraf
+  - ts-node-dev — restarts the server automatically when we make changes.
+  - @types/express — provides the typescript definitions for express.
+  - rimraf — will be used to delete previous build files to avoid stale ones. This is considered best practice when working with Typescript.
+- initiate typescript
+  - npx tsc --init
+  - target — specifies the Javascript language you want to build the Typescript files to.
+  - rootDir — points Typescript to where our source code is located, in this case, the srcfolder.
+  - outDir— specifies where the build JS file will be stored
+- scripts
+  - The dev command runs the code in the development environment
+  - build and start commands will be useful in the production environment. 
+  - The --poll flag appended to ts-node-devcontinuously monitors files for changes, ensuring automatic server restarts, which is especially beneficial in a containerized environment.
+  - ---
+- Dockerize
+- This Dockerfile comprises two different stages tagged build and production . Here’s a breakdown of each line in the file:
+- FROM node:16-alpine — Imports a base Nodejs image from the docker repository.
+- Build Stage (AS build) — implies that this stage is for building and compiling the TypeScript code.
+- WORKDIR /app — specifies the working directory in the container from which the app will be served.
+- COPY package*.json ./— copies the package.json and package-lock.jsonfiles into the container’s working directory.
+- RUN npm install— installs the project dependencies.
+- COPY . . — copies the source code into the container’s work directory.
+- RUN npm run build— builds the TypeScript code.
+- Production Stage (AS production) — used to create the final, optimized production image.
+- RUN npm ci --only=production — installs only production dependencies when creating the production image.
+- COPY --from=build /app/dist ./dist—copies the compiled code from the build stage into the dist folder in the production environment.
+- CMD ["node", "dist/index.js"]—Executes the command to run the compiled app in the production environment.
+- ---
 
-This is a blank project for CDK development with TypeScript.
-
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
-
-## Useful commands
-
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `cdk deploy`      deploy this stack to your default AWS account/region
-* `cdk diff`        compare deployed stack with current state
-* `cdk synth`       emits the synthesized CloudFormation template
+- Docker-Compose
+- version: "3.7" — specifies the Docker Compose version used.
+- services — define the services (containers) to be managed.
+- api — is the name of the service.
+- build — provides build-related configurations.
+- context: . — sets the build context to the current directory.
+- target: build — selects the build target named "build" from the Dockerfile.
+- volumes — define shared volumes between the host and the container.
+- .:/app — mounts the current directory to the "/app" directory in the container.
+- /app/node_modules — creates a volume for the "node_modules" directory.
+- ports — maps the host's port 4000 to the container's port 4000.
+- command: npm run dev — specifies the command to run inside the container, initiating the "npm run dev" script.
+- docker compose -f docker-compose.dev.yml up
